@@ -28,9 +28,13 @@ def schedule():
         return f'Тюфанка — метро Тёплый Стан: {" / ".join(stan_time)}\nМетро Тёплый Стан — Тюфанка: {" / ".join(vaulovo_time)}'
 
 
-def horoscope():
+def horoscope(sign):
     """Гороскоп на сегодня."""
-    url = f'https://horoscopes.rambler.ru/{horoscope_sign}/'
+    url = f'https://goroskop365.ru/{sign}/'
     page = requests.get(url)
 
     soup = BeautifulSoup(page.text, features='lxml')
+    temp = soup.find('div', class_='content_wrapper horoborder')
+    horo = temp.find('p')
+    return horo.text
+

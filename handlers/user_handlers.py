@@ -4,11 +4,12 @@ from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from keyboards.keyboards import create_main_keyboard
+from keyboards.keyboards import create_main_keyboard, zodiac_keyboard
 from FSM.fsm import NameForm, HoroscopeForm
 from lexicon.lexicon import LEXICON
-from utils.features import schedule
-from utils.utils import register_user, select_user, is_user_in_db
+from utils.features import schedule, horoscope
+from utils.utils import register_user, select_user, is_user_in_db, \
+    register_zodiac
 
 router = Router()
 
@@ -24,8 +25,6 @@ async def process_start_command(message: Message, state: FSMContext):
     else:
         await message.answer(LEXICON['welcome'])
         await state.set_state(NameForm.get_name)
-
-
 
 
 @router.message(StateFilter(NameForm.get_name), F.text.isalpha())
@@ -55,8 +54,23 @@ async def get_bus_schedule(callback: CallbackQuery):
 
 
 @router.callback_query(F.data == 'horoscope')
-async def get_horoscope(callback: CallbackQuery):
+async def get_horoscope(callback: CallbackQuery, state: FSMContext):
     """Гороскоп на сегодня."""
-    bus_stop = schedule()
     await callback.message.delete()
-    await callback.message.answer(bus_stop, reply_markup=create_main_keyboard())
+    await callback.message.answer(LEXICON['zodiac'],
+                                  reply_markup=zodiac_keyboard())
+    await state.set_state(HoroscopeForm.get_zodiac_sign)
+
+
+@router.callback_query(StateFilter(HoroscopeForm.get_zodiac_sign))
+async def choose_zodiac(callback: CallbackQuery, state: FSMContext):
+    """Выбор знака зодиака."""
+    await callback.message.delete()
+    await state.update_data(zodiac_sign=callback.data)
+    sign = callback.data
+    # user_data = await state.get_data()
+    # register_zodiac(user_data)
+    horoscope_today = horoscope(sign)
+    await callback.message.answer(horoscope_today,
+                                  reply_markup=create_main_keyboard())
+    await state.clear()
