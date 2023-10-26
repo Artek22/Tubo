@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 
 from config_data.config import load_config
-from handlers import user_handlers
+from handlers import user_handlers, game_handlers
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ async def main():
 
     # Регистриуем роутеры в диспетчере
     dp.include_router(user_handlers.router)
+    dp.include_router(game_handlers.game_router)
 
     # Пропускаем накопившиеся апдейты и запускаем polling
     await bot.delete_webhook(drop_pending_updates=True)

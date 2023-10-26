@@ -12,10 +12,13 @@ class TgBot:
 @dataclass
 class Config:
     tg_bot: TgBot
+    weather_api: str
 
 
 def load_config() -> Config:
     env = Env()
     env.read_env()
     return Config(
-        tg_bot=TgBot(token=env('BOT_TOKEN'), admin_id=int(env('ADMIN_ID'))))
+        tg_bot=TgBot(token=env('BOT_TOKEN'), admin_id=int(env('ADMIN_ID'))),
+        weather_api=env('WEATHER_API')
+    )
