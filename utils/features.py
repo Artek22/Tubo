@@ -1,6 +1,5 @@
 import requests
 import datetime as dt
-import pprint
 
 from bs4 import BeautifulSoup
 from config_data.config import load_config
@@ -75,8 +74,6 @@ def weather_yandex():
                               verify=True)
 
     yandex_json = yandex_req.json()
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(yandex_json)
     yandex_json["forecast"]["parts"][0]["part_name"] = WEATHER["day_time"][
         yandex_json["forecast"]["parts"][0]["part_name"]]
     yandex_json["forecast"]["parts"][1]["part_name"] = WEATHER["day_time"][
@@ -116,7 +113,7 @@ def weather_yandex():
 
 def lunar_calendar():
     """Лунный календарь."""
-    today = dt.datetime.now().strftime("%d-%m-%y")
+    today = dt.datetime.now().strftime("%d/%m/%y")
     url = 'https://voshod-solnca.ru/moon?lat=55.2183&lon=37.2409'
     url2 = 'https://my-calend.ru/moon/today'
     page = requests.get(url)
@@ -131,13 +128,17 @@ def lunar_calendar():
     sign = zodiac.find('span', class_='today-list__item-value')
     c_sign = constellation.find('span', class_='today-list__item-value')
     moon2 = soup2.find('section', {'class': 'moon-effect positive'})
+    moon3 = soup2.find('section', {'class': 'moon-effect neutral'})
     moon_in_zodiac = soup2.find('section', {'class': 'moon-effect negative'})
     first = moon2.find('h2')
     second = moon2.find('p')
+    first_moon3 = moon3.find('h2')
+    second_moon3 = moon3.find('p')
     third_title = moon_in_zodiac.find('h2')
     third = moon_in_zodiac.find_all('p')
     return f'<b>{today}</b> {moon_phase[0].text}\n──────────────────────\n' \
            f'Луна в знаке зодиака <b>{sign.text}</b> ' \
            f'в созвездии <b>{c_sign.text}</b>\n──────────────────────\n' \
            f'<b>{first.text}</b>\n{second.text}\n──────────────────────\n' \
+           f'<b>{first_moon3.text}</b>\n{second_moon3.text}\n──────────────────────\n' \
            f'<b>{third_title.text}</b>\n{third[-1].text}'

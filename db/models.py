@@ -1,8 +1,4 @@
-from sqlalchemy import (
-    BigInteger,
-    Column,
-    String,
-)
+from sqlalchemy import BigInteger, Column, String, Date
 from sqlalchemy.orm import declarative_base
 
 from db.engine import engine
@@ -15,7 +11,7 @@ class User(DeclarativeBase):
 
     id = Column("user_id", BigInteger, nullable=False, primary_key=True)
     name = Column(String(50), nullable=False)
-    zodiac_sign = Column(String(50), nullable=True)
+    oracle_date_save = Column(Date, nullable=False)
 
     def __repr__(self):
         return "<{0.__class__.__name__}(id={0.id!r})>".format(self)

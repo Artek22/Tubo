@@ -1,13 +1,16 @@
+import datetime as dt
+
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from random import randint
-import datetime as dt
-
+from db.engine import session
 from keyboards.keyboards import games_keyboard, begin_cancel_keyboard, \
     oracle_keyboard
 from lexicon.lexicon import GAMES
 from games.bulls_n_cows import secret_number
+from utils.utils import select_user
+
 
 game_router = Router()
 
@@ -35,7 +38,7 @@ async def get_bulls_n_cows(callback: CallbackQuery):
 
 
 @game_router.callback_query(F.data == 'begin')
-async def bc_start(callback: CallbackQuery, state: FSMContext):
+async def bc_start(callback: CallbackQuery):
     """Быки и коровы. Начало."""
     await callback.message.delete()
     await callback.message.answer(f'{GAMES["bc_start"]}\n'
@@ -49,11 +52,10 @@ result = ['', '', '']
 
 
 @game_router.message()
-async def bc_start(message: Message, state: FSMContext):
+async def bc_first(message: Message, state: FSMContext):
     global secret
     global cnt_move
     global result
-    print(secret)
     digit = message.text
     if not digit.isdigit() or len(set(digit)) != 3:
         await message.delete()
@@ -100,9 +102,7 @@ async def get_oracle(callback: CallbackQuery):
     await callback.message.answer(GAMES['oracle_start'],
                                   reply_markup=oracle_keyboard())
 
-today_count = 3
-oracle_today = dt.datetime.today().strftime("%D")
-oracle_save = '10/28/23'
+today_count = 0
 
 
 @game_router.callback_query(F.data == 'anticipate')
@@ -119,19 +119,24 @@ async def get_anticipate(callback: CallbackQuery):
         7: 'НЕ ТОРОПИСЬ',
         8: 'ДЕЙСТВУЙ'
     }
+
     global today_count
-    global oracle_save
-    global oracle_today
+    oracle_today = dt.datetime.now().date()
+    user = select_user(callback.message.chat.id)
+    oracle_save = user.oracle_date_save
+
     if oracle_today != oracle_save:
         today_count = 3
-        oracle_save = oracle_today
+        user.oracle_date_save = oracle_today
+        session.add(user)
+        session.commit()
     if today_count == 0:
         await callback.message.delete()
         await callback.message.answer('Оракул устал. Приходите завтра.',
                                       reply_markup=oracle_keyboard())
     else:
         today_count -= 1
-        digit = randint(0, 6)
+        digit = randint(0, 8)
         anticipate = f':･ﾟ✧:･.☽˚｡･ﾟ✧:･.:･✧:ﾟ☽･\n☽˚<b>Оракул возвестил</b>✧:\n' \
                      f'.˚｡･ﾟ✧:･.:･ﾟ☽･ﾟ✧:･｡･:･ﾟ\n\n{ANSWERS[digit]}'
         await callback.message.delete()

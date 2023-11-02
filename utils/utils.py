@@ -10,6 +10,7 @@ def register_user(user_data):
     user = User(
         id=user_data['id'],
         name=user_data['name'],
+        oracle_date_save=user_data['oracle_date_save']
     )
     session.add(user)
     try:

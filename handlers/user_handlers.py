@@ -1,3 +1,5 @@
+import datetime
+
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.state import default_state
@@ -33,6 +35,7 @@ async def get_name(message: Message, state: FSMContext):
     """Ввод имени."""
     await state.update_data(id=message.chat.id)
     await state.update_data(name=message.text)
+    await state.update_data(oracle_date_save=datetime.datetime.now().date())
     user_data = await state.get_data()
     register_user(user_data)
     await message.answer(f'{LEXICON["name"]}, {message.text}',
