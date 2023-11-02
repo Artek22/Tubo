@@ -1,6 +1,8 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+from random import randint
+import datetime as dt
 
 from keyboards.keyboards import games_keyboard, begin_cancel_keyboard, \
     oracle_keyboard
@@ -92,8 +94,46 @@ async def bc_start(message: Message, state: FSMContext):
 
 
 @game_router.callback_query(F.data == 'about_oracle')
-async def get_bulls_n_cows(callback: CallbackQuery):
+async def get_oracle(callback: CallbackQuery):
     """Выбор игры Оракул."""
     await callback.message.delete()
     await callback.message.answer(GAMES['oracle_start'],
                                   reply_markup=oracle_keyboard())
+
+today_count = 3
+oracle_today = dt.datetime.today().strftime("%D")
+oracle_save = '10/28/23'
+
+
+@game_router.callback_query(F.data == 'anticipate')
+async def get_anticipate(callback: CallbackQuery):
+    """Предвидение."""
+    ANSWERS = {
+        0: 'ДА',
+        1: 'НЕТ',
+        2: 'ВОЗМОЖНО',
+        3: 'ПОДОЖДИ',
+        4: 'ЕСЛИ ЧУВСТВУЕШЬ В СЕБЕ СИЛЫ - ВСЕ ПОЛУЧИТСЯ',
+        5: 'ПОСТАВЬ ЦЕЛЬ',
+        6: 'БУДЬ БЛАГОДАРЕН',
+        7: 'НЕ ТОРОПИСЬ',
+        8: 'ДЕЙСТВУЙ'
+    }
+    global today_count
+    global oracle_save
+    global oracle_today
+    if oracle_today != oracle_save:
+        today_count = 3
+        oracle_save = oracle_today
+    if today_count == 0:
+        await callback.message.delete()
+        await callback.message.answer('Оракул устал. Приходите завтра.',
+                                      reply_markup=oracle_keyboard())
+    else:
+        today_count -= 1
+        digit = randint(0, 6)
+        anticipate = f':･ﾟ✧:･.☽˚｡･ﾟ✧:･.:･✧:ﾟ☽･\n☽˚<b>Оракул возвестил</b>✧:\n' \
+                     f'.˚｡･ﾟ✧:･.:･ﾟ☽･ﾟ✧:･｡･:･ﾟ\n\n{ANSWERS[digit]}'
+        await callback.message.delete()
+        await callback.message.answer(anticipate,
+                                      reply_markup=oracle_keyboard())

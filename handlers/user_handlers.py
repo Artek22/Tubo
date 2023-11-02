@@ -8,19 +8,20 @@ from keyboards.keyboards import create_main_keyboard, zodiac_keyboard, \
     next_keyboard
 from FSM.fsm import NameForm, HoroscopeForm
 from lexicon.lexicon import LEXICON
-from utils.features import schedule, horoscope, weather_forecast, lunar_calendar
-from utils.utils import register_user, select_user, is_user_in_db
+from utils.features import schedule, horoscope, weather_yandex, lunar_calendar
+from utils.utils import register_user, select_user, is_user_in_db, time_of_day
 
 router = Router()
 
-#todo Сделать приветствие, привязанное ко времени
+
 @router.message(CommandStart(), StateFilter(default_state))
 async def process_start_command(message: Message, state: FSMContext):
     """"/start"""
     user = select_user(message.chat.id)
 
     if is_user_in_db(message.chat.id):
-        await message.answer(f'Добрый день, {user.name}',
+        day_time = time_of_day()
+        await message.answer(f'{day_time}, {user.name}',
                              reply_markup=create_main_keyboard())
     else:
         await message.answer(LEXICON['welcome'])
@@ -78,7 +79,7 @@ async def choose_zodiac(callback: CallbackQuery, state: FSMContext):
 async def get_weather(callback: CallbackQuery):
     """Прогноз погоды."""
     await callback.message.delete()
-    forecast = weather_forecast()
+    forecast = weather_yandex()
     await callback.message.answer(forecast, reply_markup=create_main_keyboard())
 
 
