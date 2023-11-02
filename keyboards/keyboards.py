@@ -86,7 +86,7 @@ def games_keyboard():
         text='Назад',
         callback_data='next')
     games: InlineKeyboardMarkup = InlineKeyboardMarkup(
-        inline_keyboard=[[bulls], [rock], [oracle], [back]])
+        inline_keyboard=[[bulls], [oracle], [back]])
     return games
 
 
