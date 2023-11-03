@@ -114,31 +114,37 @@ def weather_yandex():
 def lunar_calendar():
     """Лунный календарь."""
     today = dt.datetime.now().strftime("%d/%m/%y")
-    url = 'https://voshod-solnca.ru/moon?lat=55.2183&lon=37.2409'
-    url2 = 'https://my-calend.ru/moon/today'
+    url = 'https://my-calend.ru/moon/today'
     page = requests.get(url)
-    page2 = requests.get(url2)
     soup = BeautifulSoup(page.text, features='lxml')
-    soup2 = BeautifulSoup(page2.text, features='lxml')
-    moon_phase = soup.find_all('span', {'data-name': 'phase-name'})
-    moon_zodiac = soup.find_all('p',
-                                class_='today-list__item-container w-100 mb-0 d-flex flex-wrap')
-    zodiac = moon_zodiac[-2]
-    constellation = moon_zodiac[-1]
-    sign = zodiac.find('span', class_='today-list__item-value')
-    c_sign = constellation.find('span', class_='today-list__item-value')
-    moon2 = soup2.find('section', {'class': 'moon-effect positive'})
-    moon3 = soup2.find('section', {'class': 'moon-effect neutral'})
-    moon_in_zodiac = soup2.find('section', {'class': 'moon-effect negative'})
-    first = moon2.find('h2')
-    second = moon2.find('p')
-    first_moon3 = moon3.find('h2')
-    second_moon3 = moon3.find('p')
-    third_title = moon_in_zodiac.find('h2')
-    third = moon_in_zodiac.find_all('p')
-    return f'<b>{today}</b> {moon_phase[0].text}\n──────────────────────\n' \
-           f'Луна в знаке зодиака <b>{sign.text}</b> ' \
-           f'в созвездии <b>{c_sign.text}</b>\n──────────────────────\n' \
-           f'<b>{first.text}</b>\n{second.text}\n──────────────────────\n' \
-           f'<b>{first_moon3.text}</b>\n{second_moon3.text}\n──────────────────────\n' \
-           f'<b>{third_title.text}</b>\n{third[-1].text}'
+    moon_positive = soup.find('section', {'class': 'moon-effect positive'})
+    moon_neutral = soup.find('section', {'class': 'moon-effect neutral'})
+    moon_negative = soup.find('section', {'class': 'moon-effect negative'})
+    sign_class = soup.find('table', {'class': 'moon-day-info-2'})
+    sign_span = sign_class.find_all('span')
+    if moon_positive is not None:
+        first_positive = moon_positive.find('h2').text
+        second_positive = moon_positive.find('p').text
+    else:
+        first_positive = ''
+        second_positive = ''
+    if moon_neutral is not None:
+        first_neutral = moon_neutral.find('h2').text
+        second_neutral = moon_neutral.find('p').text
+    else:
+        first_neutral = ''
+        second_neutral = ''
+    if moon_negative is not None:
+        first_negative = moon_negative.find('h2').text
+        second_negative = moon_negative.find('p').text
+    else:
+        first_negative = ''
+        second_negative = ''
+    return f'<b>{today}</b>. {sign_span[-1].text}\n══════════════════════\n' \
+           f'<b>{first_positive}</b>\n{second_positive}' \
+           f'\n──────────────────────\n' \
+           f'<b>{first_neutral}</b>\n{second_neutral}' \
+           f'\n──────────────────────\n' \
+           f'<b>{first_negative}</b>\n{second_negative}'
+
+lunar_calendar()

@@ -18,7 +18,7 @@ router = Router()
 
 @router.message(CommandStart(), StateFilter(default_state))
 async def process_start_command(message: Message, state: FSMContext):
-    """"/start"""
+    """/start"""
     user = select_user(message.chat.id)
 
     if is_user_in_db(message.chat.id):
@@ -33,6 +33,7 @@ async def process_start_command(message: Message, state: FSMContext):
 @router.message(StateFilter(NameForm.get_name), F.text.isalpha())
 async def get_name(message: Message, state: FSMContext):
     """Ввод имени."""
+    await message.delete()
     await state.update_data(id=message.chat.id)
     await state.update_data(name=message.text)
     await state.update_data(oracle_date_save=datetime.datetime.now().date())
