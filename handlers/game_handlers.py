@@ -102,7 +102,7 @@ async def get_oracle(callback: CallbackQuery):
     await callback.message.answer(GAMES['oracle_start'],
                                   reply_markup=oracle_keyboard())
 
-today_count = 0
+today_count = 3
 
 
 @game_router.callback_query(F.data == 'anticipate')
@@ -117,7 +117,14 @@ async def get_anticipate(callback: CallbackQuery):
         5: 'ПОСТАВЬ ЦЕЛЬ',
         6: 'БУДЬ БЛАГОДАРЕН',
         7: 'НЕ ТОРОПИСЬ',
-        8: 'ДЕЙСТВУЙ'
+        8: 'ДЕЙСТВУЙ',
+        9: 'ОДНОЗНАЧНО',
+        10: 'ТОЧНО НЕ СЕЙЧАС',
+        11: 'ПРИСЛУШАЙСЯ К СЕБЕ',
+        12: 'МОЖНО ПОПРОБОВАТЬ, НО ОСТОРОЖНО',
+        13: 'В ДРУГОЙ РАЗ НА ЭТО УЙДЕТ МЕНЬШЕ СИЛ',
+        14: 'СПРОСИ ОБ ЭТОМ ЗАВТРА',
+        15: 'СФОРМУЛИРУЙ ВОПРОС ПО_ДРУГОМУ',
     }
 
     global today_count
@@ -136,7 +143,7 @@ async def get_anticipate(callback: CallbackQuery):
                                       reply_markup=oracle_keyboard())
     else:
         today_count -= 1
-        digit = randint(0, 8)
+        digit = randint(0, 15)
         anticipate = f':･ﾟ✧:･.☽˚｡･ﾟ✧:･.:･✧:ﾟ☽･\n☽˚<b>Оракул возвестил</b>✧:\n' \
                      f'.˚｡･ﾟ✧:･.:･ﾟ☽･ﾟ✧:･｡･:･ﾟ\n\n{ANSWERS[digit]}'
         await callback.message.delete()

@@ -1,5 +1,6 @@
 import logging
 import asyncio
+from logging.handlers import RotatingFileHandler
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -19,10 +20,17 @@ bot = Bot(token=config.tg_bot.token, parse_mode=ParseMode.HTML)
 async def main():
     """Функция конфигурирования и запуска бота."""
     # Конфигурируем логирование
+    rotating_handler = RotatingFileHandler(
+        filename="bot_logfile.log",
+        maxBytes=50000000,
+        backupCount=3,
+        encoding="utf-8",
+    )
     logging.basicConfig(
         level=logging.INFO,
         format="%(filename)s:%(lineno)d #%(levelname)-8s "
-               "[%(asctime)s] - %(name)s - %(message)s"
+               "[%(asctime)s] - %(name)s - %(message)s",
+        handlers=[rotating_handler],
     )
 
     # Выводим в консоль информацию о начале запуска бота
