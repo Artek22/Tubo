@@ -3,7 +3,7 @@ import datetime as dt
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from random import randint
+from random import shuffle
 from db.engine import session
 from keyboards.keyboards import games_keyboard, begin_cancel_keyboard, \
     oracle_keyboard
@@ -108,24 +108,24 @@ today_count = 3
 @game_router.callback_query(F.data == 'anticipate')
 async def get_anticipate(callback: CallbackQuery):
     """Предвидение."""
-    ANSWERS = {
-        0: 'ДА',
-        1: 'НЕТ',
-        2: 'ВОЗМОЖНО',
-        3: 'ПОДОЖДИ',
-        4: 'ЕСЛИ ЧУВСТВУЕШЬ В СЕБЕ СИЛЫ - ВСЕ ПОЛУЧИТСЯ',
-        5: 'ПОСТАВЬ ЦЕЛЬ',
-        6: 'БУДЬ БЛАГОДАРЕН',
-        7: 'НЕ ТОРОПИСЬ',
-        8: 'ДЕЙСТВУЙ',
-        9: 'ОДНОЗНАЧНО',
-        10: 'ТОЧНО НЕ СЕЙЧАС',
-        11: 'ПРИСЛУШАЙСЯ К СЕБЕ',
-        12: 'МОЖНО ПОПРОБОВАТЬ, НО ОСТОРОЖНО',
-        13: 'В ДРУГОЙ РАЗ НА ЭТО УЙДЕТ МЕНЬШЕ СИЛ',
-        14: 'СПРОСИ ОБ ЭТОМ ЗАВТРА',
-        15: 'СФОРМУЛИРУЙ ВОПРОС ПО_ДРУГОМУ',
-    }
+    answers = [
+        'ДА',
+        'НЕТ',
+        'ВОЗМОЖНО',
+        'ПОДОЖДИ',
+        'ЕСЛИ ЧУВСТВУЕШЬ В СЕБЕ СИЛЫ - ВСЕ ПОЛУЧИТСЯ',
+        'ПОСТАВЬ ЦЕЛЬ',
+        'БУДЬ БЛАГОДАРЕН',
+        'НЕ ТОРОПИСЬ',
+        'ДЕЙСТВУЙ',
+        'ОДНОЗНАЧНО',
+        'ТОЧНО НЕ СЕЙЧАС',
+        'ПРИСЛУШАЙСЯ К СЕБЕ',
+        'МОЖНО ПОПРОБОВАТЬ, НО ОСТОРОЖНО',
+        'В ДРУГОЙ РАЗ НА ЭТО УЙДЕТ МЕНЬШЕ СИЛ',
+        'СПРОСИ ОБ ЭТОМ ЗАВТРА',
+        'СФОРМУЛИРУЙ ВОПРОС ПО_ДРУГОМУ',
+    ]
 
     global today_count
     oracle_today = dt.datetime.now().date()
@@ -143,9 +143,9 @@ async def get_anticipate(callback: CallbackQuery):
                                       reply_markup=oracle_keyboard())
     else:
         today_count -= 1
-        digit = randint(0, 15)
+        shuffle(answers)
         anticipate = f':･ﾟ✧:･.☽˚｡･ﾟ✧:･.:･✧:ﾟ☽･\n☽˚<b>Оракул возвестил</b>✧:\n' \
-                     f'.˚｡･ﾟ✧:･.:･ﾟ☽･ﾟ✧:･｡･:･ﾟ\n\n{ANSWERS[digit]}'
+                     f'.˚｡･ﾟ✧:･.:･ﾟ☽･ﾟ✧:･｡･:･ﾟ\n\n{answers[0]}'
         await callback.message.delete()
         await callback.message.answer(anticipate,
                                       reply_markup=oracle_keyboard())

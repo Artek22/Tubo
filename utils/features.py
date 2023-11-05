@@ -98,7 +98,8 @@ def weather_yandex():
                  f'<b>{fact["condition"]}</b>\n' \
                  f'💨<b>Скорость ветра</b> {fact["wind_speed"]} м/с, ' \
                  f'направление {fact["wind_dir"]}\n' \
-                 f'<b>Влажность</b> {fact["humidity"]}%\n' \
+                 f'<b>Влажность</b> {fact["humidity"]}%\n<b>Атм. давление</b> ' \
+                 f'{fact["pressure_mm"]} мм рт. ст.\n' \
                  f'🌅<b>Рассвет</b> {fore["sunrise"]}\n' \
                  f'🏜️<b>Закат</b> {fore["sunset"]}\n' \
                  f'══════════════════════\n' \
@@ -125,26 +126,23 @@ def lunar_calendar():
     if moon_positive is not None:
         first_positive = moon_positive.find('h2').text
         second_positive = moon_positive.find('p').text
+        all_positive = f'<b>{first_positive}</b>\n{second_positive}\n' \
+                       f'──────────────────────\n'
     else:
-        first_positive = ''
-        second_positive = ''
+        all_positive = ''
     if moon_neutral is not None:
         first_neutral = moon_neutral.find('h2').text
         second_neutral = moon_neutral.find('p').text
+        all_neutral = f'<b>{first_neutral}</b>\n{second_neutral}\n' \
+                      f'──────────────────────\n'
     else:
-        first_neutral = ''
-        second_neutral = ''
+        all_neutral = ''
     if moon_negative is not None:
         first_negative = moon_negative.find('h2').text
         second_negative = moon_negative.find('p').text
+        all_negative = f'<b>{first_negative}</b>\n{second_negative}\n' \
+                       f'──────────────────────\n'
     else:
-        first_negative = ''
-        second_negative = ''
+        all_negative = ''
     return f'<b>{today}</b>. {sign_span[-1].text}\n══════════════════════\n' \
-           f'<b>{first_positive}</b>\n{second_positive}' \
-           f'\n──────────────────────\n' \
-           f'<b>{first_neutral}</b>\n{second_neutral}' \
-           f'\n──────────────────────\n' \
-           f'<b>{first_negative}</b>\n{second_negative}'
-
-lunar_calendar()
+           f'{all_positive}{all_neutral}{all_negative}'
