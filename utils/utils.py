@@ -1,8 +1,10 @@
+import requests
 from datetime import datetime
+from bs4 import BeautifulSoup
+from sqlalchemy.exc import IntegrityError
 
 from db.models import User
 from db.engine import session
-from sqlalchemy.exc import IntegrityError
 
 
 def register_user(user_data):
@@ -45,7 +47,6 @@ def time_of_day():
     afternoon_start = datetime.strptime('12:00', '%H:%M').time()
     evening_start = datetime.strptime('17:00', '%H:%M').time()
     night_start = datetime.strptime('23:59', '%H:%M').time()
-    daytime = ''
     local_time = datetime.now().time()
     if morning_start <= local_time < afternoon_start:
         daytime = DAY_TEXT['morning']
@@ -53,7 +54,15 @@ def time_of_day():
         daytime = DAY_TEXT['day']
     elif evening_start <= local_time < night_start:
         daytime = DAY_TEXT['evening']
-    elif night_start <= local_time < morning_start:
+    else:
         daytime = DAY_TEXT['night']
     return daytime
 
+
+def event_details(event):
+    contacts_link = event['id']
+    page_contacts = requests.get(contacts_link)
+    soup_contacts = BeautifulSoup(page_contacts.text, features='lxml')
+    soup_div = soup_contacts.find('div', style="text-align: justify;")
+
+    return soup_div.text

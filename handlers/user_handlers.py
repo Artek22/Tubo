@@ -1,4 +1,6 @@
 import datetime
+import httpx
+import feedparser
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
@@ -7,11 +9,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from keyboards.keyboards import create_main_keyboard, zodiac_keyboard, \
-    next_keyboard
+    next_keyboard, pagination_keyboard, back_keyboard
 from FSM.fsm import NameForm, HoroscopeForm
 from lexicon.lexicon import LEXICON
 from utils.features import schedule, horoscope, weather_yandex, lunar_calendar
-from utils.utils import register_user, select_user, is_user_in_db, time_of_day
+from utils.utils import register_user, select_user, is_user_in_db, time_of_day, \
+    event_details
 
 router = Router()
 
@@ -121,3 +124,93 @@ async def back_page(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.clear()
     await callback.message.edit_reply_markup(reply_markup=next_keyboard())
+
+
+n_event = 0
+
+
+@router.callback_query(F.data == 'events')
+async def get_events(callback: CallbackQuery):
+    """Календарь событий."""
+    await callback.message.delete()
+    global n_event
+    n_event = 0
+    rss_link = 'https://direct-chekhov.ru/category/kulturnyye-sobytiya/feed/'
+
+    httpx_client = httpx.AsyncClient()
+    response = await httpx_client.get(rss_link)
+    feed = feedparser.parse(response.text)
+    await callback.message.answer(
+        f'{feed.entries[n_event]["summary"]}\n',
+        reply_markup=pagination_keyboard(n_event + 1,
+                                         len(feed.entries)))
+
+
+@router.callback_query(F.data == 'forward')
+async def get_forward(callback: CallbackQuery):
+    """Календарь событий. Вперед."""
+    global n_event
+    n_event += 1
+    rss_link = 'https://direct-chekhov.ru/category/kulturnyye-sobytiya/feed/'
+
+    httpx_client = httpx.AsyncClient()
+    response = await httpx_client.get(rss_link)
+    feed = feedparser.parse(response.text)
+    if n_event > 11:
+        n_event = 0
+    await callback.message.edit_text(
+        f'{feed.entries[n_event]["summary"]}\n',
+        reply_markup=pagination_keyboard(n_event + 1,
+                                         len(feed.entries)))
+
+
+@router.callback_query(F.data == 'backward')
+async def get_backward(callback: CallbackQuery):
+    """Календарь событий. Назад."""
+    global n_event
+    n_event -= 1
+    rss_link = 'https://direct-chekhov.ru/category/kulturnyye-sobytiya/feed/'
+
+    httpx_client = httpx.AsyncClient()
+    response = await httpx_client.get(rss_link)
+    feed = feedparser.parse(response.text)
+    if n_event < 0:
+        n_event = 11
+    await callback.message.edit_text(
+        f'{feed.entries[n_event]["summary"]}\n',
+        reply_markup=pagination_keyboard(n_event + 1,
+                                         len(feed.entries)))
+
+
+@router.callback_query(F.data == 'details')
+async def get_event_details(callback: CallbackQuery):
+    """Календарь событий. Детали."""
+    global n_event
+    rss_link = 'https://direct-chekhov.ru/category/kulturnyye-sobytiya/feed/'
+
+    httpx_client = httpx.AsyncClient()
+    response = await httpx_client.get(rss_link)
+    feed = feedparser.parse(response.text)
+    event = feed.entries[n_event]
+    event_text = event_details(event)
+    await callback.message.edit_text(event_text, reply_markup=back_keyboard())
+
+
+@router.callback_query(F.data == 'back_current_event')
+async def get_back_current_event(callback: CallbackQuery):
+    """Календарь событий. Выйти из деталей."""
+    global n_event
+    rss_link = 'https://direct-chekhov.ru/category/kulturnyye-sobytiya/feed/'
+
+    httpx_client = httpx.AsyncClient()
+    response = await httpx_client.get(rss_link)
+    feed = feedparser.parse(response.text)
+    await callback.message.edit_text(
+        f'{feed.entries[n_event]["summary"]}\n',
+        reply_markup=pagination_keyboard(n_event + 1,
+                                         len(feed.entries)))
+
+
+@router.callback_query(F.data == 'empty')
+async def get_empty(callback: CallbackQuery):
+    await callback.answer()

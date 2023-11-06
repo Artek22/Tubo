@@ -12,12 +12,15 @@ def create_main_keyboard():
     guide_button: InlineKeyboardButton = InlineKeyboardButton(
         text='📙 Справочник',
         callback_data='guide')
+    calendar_button: InlineKeyboardButton = InlineKeyboardButton(
+        text='🗓️ Календарь событий',
+        callback_data='events')
     next_button: InlineKeyboardButton = InlineKeyboardButton(
         text='...',
         callback_data='next')
     main_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(
         inline_keyboard=[[forecast_button], [schedule_button],
-                         [guide_button], [next_button]])
+                         [guide_button], [calendar_button], [next_button]])
     return main_keyboard
 
 
@@ -104,7 +107,37 @@ def oracle_keyboard():
     """Клавиатура для игры "Оракул"."""
     begin_cancel_builder = InlineKeyboardBuilder()
     begin_cancel_builder.row(
-        InlineKeyboardButton(text='🔮·:*¨Предвидеть¨*:·', callback_data='anticipate'),
+        InlineKeyboardButton(text='🔮·:*¨Предвидеть¨*:·',
+                             callback_data='anticipate'),
         InlineKeyboardButton(text='Назад', callback_data='games_cancel')
     )
     return begin_cancel_builder.as_markup()
+
+
+def pagination_keyboard(cur_page: int, all_pages: int) -> InlineKeyboardMarkup:
+    """Клавиатура для календаря событий."""
+    kb_builder = InlineKeyboardBuilder()
+    # Добавляем в билдер ряд с кнопками
+    kb_builder.row(
+        InlineKeyboardButton(text='<<',
+                             callback_data='backward'),
+        InlineKeyboardButton(text=f'{cur_page}/{all_pages}',
+                             callback_data='empty'),
+        InlineKeyboardButton(text='>>',
+                             callback_data='forward'),
+        InlineKeyboardButton(text='Подробнее',
+                             callback_data='details'),
+        InlineKeyboardButton(text='Вернуться',
+                             callback_data='back'),
+        width=3)
+    # Возвращаем объект инлайн-клавиатуры
+    return kb_builder.as_markup()
+
+
+def back_keyboard():
+    back_button: InlineKeyboardButton = InlineKeyboardButton(
+        text='Вернуться',
+        callback_data='back_current_event')
+    back: InlineKeyboardMarkup = InlineKeyboardMarkup(
+        inline_keyboard=[[back_button]])
+    return back
