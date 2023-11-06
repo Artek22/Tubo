@@ -139,11 +139,14 @@ async def get_events(callback: CallbackQuery):
 
     httpx_client = httpx.AsyncClient()
     response = await httpx_client.get(rss_link)
-    feed = feedparser.parse(response.text)
-    await callback.message.answer(
-        f'{feed.entries[n_event]["summary"]}\n',
-        reply_markup=pagination_keyboard(n_event + 1,
-                                         len(feed.entries)))
+    if response.status_code != 200:
+        return 'Прогноз сейчас недоступен. Попробуйте позже.'
+    else:
+        feed = feedparser.parse(response.text)
+        await callback.message.answer(
+            f'{feed.entries[n_event]["summary"]}\n',
+            reply_markup=pagination_keyboard(n_event + 1,
+                                             len(feed.entries)))
 
 
 @router.callback_query(F.data == 'forward')
@@ -155,13 +158,16 @@ async def get_forward(callback: CallbackQuery):
 
     httpx_client = httpx.AsyncClient()
     response = await httpx_client.get(rss_link)
-    feed = feedparser.parse(response.text)
-    if n_event > 11:
-        n_event = 0
-    await callback.message.edit_text(
-        f'{feed.entries[n_event]["summary"]}\n',
-        reply_markup=pagination_keyboard(n_event + 1,
-                                         len(feed.entries)))
+    if response.status_code != 200:
+        return 'Прогноз сейчас недоступен. Попробуйте позже.'
+    else:
+        feed = feedparser.parse(response.text)
+        if n_event > 11:
+            n_event = 0
+        await callback.message.edit_text(
+            f'{feed.entries[n_event]["summary"]}\n',
+            reply_markup=pagination_keyboard(n_event + 1,
+                                             len(feed.entries)))
 
 
 @router.callback_query(F.data == 'backward')
@@ -173,13 +179,16 @@ async def get_backward(callback: CallbackQuery):
 
     httpx_client = httpx.AsyncClient()
     response = await httpx_client.get(rss_link)
-    feed = feedparser.parse(response.text)
-    if n_event < 0:
-        n_event = 11
-    await callback.message.edit_text(
-        f'{feed.entries[n_event]["summary"]}\n',
-        reply_markup=pagination_keyboard(n_event + 1,
-                                         len(feed.entries)))
+    if response.status_code != 200:
+        return 'Прогноз сейчас недоступен. Попробуйте позже.'
+    else:
+        feed = feedparser.parse(response.text)
+        if n_event < 0:
+            n_event = 11
+        await callback.message.edit_text(
+            f'{feed.entries[n_event]["summary"]}\n',
+            reply_markup=pagination_keyboard(n_event + 1,
+                                             len(feed.entries)))
 
 
 @router.callback_query(F.data == 'details')
@@ -190,10 +199,14 @@ async def get_event_details(callback: CallbackQuery):
 
     httpx_client = httpx.AsyncClient()
     response = await httpx_client.get(rss_link)
-    feed = feedparser.parse(response.text)
-    event = feed.entries[n_event]
-    event_text = event_details(event)
-    await callback.message.edit_text(event_text, reply_markup=back_keyboard())
+    if response.status_code != 200:
+        return 'Прогноз сейчас недоступен. Попробуйте позже.'
+    else:
+        feed = feedparser.parse(response.text)
+        event = feed.entries[n_event]
+        event_text = event_details(event)
+        await callback.message.edit_text(event_text,
+                                         reply_markup=back_keyboard())
 
 
 @router.callback_query(F.data == 'back_current_event')
@@ -204,11 +217,14 @@ async def get_back_current_event(callback: CallbackQuery):
 
     httpx_client = httpx.AsyncClient()
     response = await httpx_client.get(rss_link)
-    feed = feedparser.parse(response.text)
-    await callback.message.edit_text(
-        f'{feed.entries[n_event]["summary"]}\n',
-        reply_markup=pagination_keyboard(n_event + 1,
-                                         len(feed.entries)))
+    if response.status_code != 200:
+        return 'Прогноз сейчас недоступен. Попробуйте позже.'
+    else:
+        feed = feedparser.parse(response.text)
+        await callback.message.edit_text(
+            f'{feed.entries[n_event]["summary"]}\n',
+            reply_markup=pagination_keyboard(n_event + 1,
+                                             len(feed.entries)))
 
 
 @router.callback_query(F.data == 'empty')
