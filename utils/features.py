@@ -30,7 +30,7 @@ def schedule():
     else:
         to_stan = bus_stops_tuf_msk[0].text.strip()
         to_vaulovo = bus_stops_msk_tuf.text.strip()
-        to_chekhov = bus_stops_chekhov[0].text.strip()[:-12]
+        to_chekhov = bus_stops_chekhov[1].text.strip()[:-12]
 
         stan_time = []
         vaulovo_time = []
