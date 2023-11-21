@@ -1,4 +1,4 @@
-![](../../Downloads/photo_2023-11-21 18.44.55.jpeg)
+![photo_2023-11-21 18 44 55](https://github.com/Artek22/Tubo/assets/107869911/f931234f-1fbf-4b61-b72b-93ecebf309bd)
 # Tubo
 Деревенский бот
 
