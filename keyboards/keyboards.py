@@ -85,11 +85,14 @@ def games_keyboard():
     rock: InlineKeyboardButton = InlineKeyboardButton(
         text='✊✌️✋ Камень, ножницы, бумага',
         callback_data='about_rock')
+    grafoman: InlineKeyboardButton = InlineKeyboardButton(
+        text='🖋️ С.Н.💪🤝!',
+        callback_data='grafoman')
     back: InlineKeyboardButton = InlineKeyboardButton(
         text='Назад',
         callback_data='next')
     games: InlineKeyboardMarkup = InlineKeyboardMarkup(
-        inline_keyboard=[[bulls], [oracle], [back]])
+        inline_keyboard=[[bulls], [oracle], [grafoman], [back]])
     return games
 
 
@@ -141,3 +144,15 @@ def back_keyboard():
     back: InlineKeyboardMarkup = InlineKeyboardMarkup(
         inline_keyboard=[[back_button]])
     return back
+
+
+def grafoman_keyboard():
+    stroganize_button: InlineKeyboardButton = InlineKeyboardButton(
+        text='Stroganize',
+        callback_data='begin_grafoman')
+    back_button: InlineKeyboardButton = InlineKeyboardButton(
+        text='Вернуться',
+        callback_data='games_cancel')
+    graf: InlineKeyboardMarkup = InlineKeyboardMarkup(
+        inline_keyboard=[[back_button]])
+    return graf

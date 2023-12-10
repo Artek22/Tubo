@@ -22,6 +22,7 @@ router = Router()
 @router.message(CommandStart(), StateFilter(default_state))
 async def process_start_command(message: Message, state: FSMContext):
     """/start"""
+    await state.clear()
     user = select_user(message.chat.id)
 
     if is_user_in_db(message.chat.id):

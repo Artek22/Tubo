@@ -1,16 +1,17 @@
 import datetime as dt
 
 from aiogram import Router, F
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from random import shuffle
+from random import shuffle, choice
 from db.engine import session
+from FSM.fsm import GrafomanForm, BullsNCows
 from keyboards.keyboards import games_keyboard, begin_cancel_keyboard, \
-    oracle_keyboard
+    oracle_keyboard, grafoman_keyboard
 from lexicon.lexicon import GAMES
 from games.bulls_n_cows import secret_number
 from utils.utils import select_user
-
 
 game_router = Router()
 
@@ -29,20 +30,73 @@ async def back_page(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Отмена', reply_markup=games_keyboard())
 
 
+@game_router.callback_query(F.data == 'grafoman')
+async def grafoman(callback: CallbackQuery, state: FSMContext):
+    """Игра графоман."""
+    await callback.message.delete()
+    await callback.message.answer(GAMES['grafoman_start'],
+                                  reply_markup=grafoman_keyboard())
+    await state.set_state(GrafomanForm.stroganize_text)
+
+
+@game_router.message(StateFilter(GrafomanForm.stroganize_text))
+async def stroganize_text(message: Message):
+    """Игра графоман. Обработка текста."""
+    grafoman = ['💪', '🤝', '☝️', '🙏', '👍', ' и АГОЧ']
+    graf_end = ' С ув., С.Н.💪🤝!'
+    consonant = ['б', 'в', 'г', 'д', 'ж', 'з', 'к', 'л', 'м', 'н', 'п', 'р',
+                 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ']
+
+    await message.delete()
+    text = message.text
+
+    graf_text = text.split()
+
+    len_text = len(graf_text)
+    if len_text <= 3:
+        await message.answer(
+            'Напишите хотя бы пару предложений. Почувствуйте себя графоманом!')
+    else:
+        # Делаем сокращения
+        for i in graf_text:
+            if len(i) >= 10:
+                if i[5] in consonant:
+                    ind = graf_text.index(i)
+                    i = i[:6] + '.'
+                    graf_text[ind] = i
+                else:
+                    ind = graf_text.index(i)
+                    i = i[:5] + '.'
+                    graf_text[ind] = i
+
+        # Добавляем словам в конце смайлы
+        for i in range(len_text // 3):
+            elem = choice(grafoman)
+            word = choice(graf_text)
+            ind = graf_text.index(word)
+            new = graf_text[ind] + elem
+            graf_text[ind] = new
+
+        result = ' '.join(graf_text) + graf_end
+        await message.answer(result, reply_markup=grafoman_keyboard())
+
+
 @game_router.callback_query(F.data == 'about_bulls')
-async def get_bulls_n_cows(callback: CallbackQuery):
+async def get_bulls_n_cows(callback: CallbackQuery, state: FSMContext):
     """Выбор игры Быки и коровы."""
     await callback.message.delete()
+    await state.set_state(BullsNCows.get_start)
     await callback.message.answer(GAMES['bc_start'],
                                   reply_markup=begin_cancel_keyboard())
 
 
-@game_router.callback_query(F.data == 'begin')
-async def bc_start(callback: CallbackQuery):
+@game_router.callback_query(StateFilter(BullsNCows.get_start), F.data == 'begin')
+async def bc_start(callback: CallbackQuery, state: FSMContext):
     """Быки и коровы. Начало."""
     await callback.message.delete()
     await callback.message.answer(f'{GAMES["bc_start"]}\n'
                                   f'Введите трехзначное число:')
+    await state.clear()
 
 
 cnt_move = 1
@@ -101,6 +155,7 @@ async def get_oracle(callback: CallbackQuery):
     await callback.message.delete()
     await callback.message.answer(GAMES['oracle_start'],
                                   reply_markup=oracle_keyboard())
+
 
 today_count = 3
 
